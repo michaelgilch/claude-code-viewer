@@ -48,6 +48,8 @@ def main():
             content_details = b.get("text", "")[:80]
           elif btype == "tool_use":
             content_details = b.get("name", "")
+          elif btype == "tool_result":
+            content_details = str(b.get("content", ""))[:80]
           else:
             content_details = ""
           content_parts.append(f"[{btype}]: {content_details}")
