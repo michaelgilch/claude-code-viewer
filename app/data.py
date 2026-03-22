@@ -16,9 +16,14 @@ def _parse_timestamp(ts: str | None) -> datetime | None:
 
 
 def _parse_record(raw: dict) -> Message:
+    msg = raw.get("message", {}) or {}
     return Message(
         type=raw.get("type", "unknown"),
         timestamp=_parse_timestamp(raw.get("timestamp")),
+        session_id=raw.get("sessionId"),
+        cwd=raw.get("cwd"),
+        slug=raw.get("slug"),
+        role=msg.get("role"),
     )
 
 
