@@ -34,5 +34,9 @@ print()
 # role:      "user" or "assistant" (None for non-conversation records)
 # text:      message contents
 for m in session.messages:
-    thinking = "[thinking] " if m.has_thinking else ""
-    print(f"{m.type:25s} {m.timestamp} {m.role:10s} {thinking}{(m.text or '')[:30]}")
+    tags = []
+    if m.has_thinking: tags.append("[thinking]")
+    if m.tool_name: tags.append(f"[{m.tool_name}]")
+    tag_str = " ".join(tags)
+    text_preview = (m.text or "")[:30]
+    print(f"{m.type:25s} {m.timestamp} {m.role:10s} {tag_str} {text_preview}")

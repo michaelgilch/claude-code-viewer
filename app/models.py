@@ -61,6 +61,11 @@ class Message(BaseModel):
     # the actual thinking content in the JSONL, so we just track presence.
     has_thinking: bool = False
 
+    # The tool name from a tool_use block, e.g. "Bash", "Read", "Write".
+    # Only present on assistant records that contain a tool call.
+    #   {"type": "tool_use", "name": "Bash", "input": {"command": "ls"}}
+    tool_name: str | None = None
+
 
 class Session(BaseModel):
     """
