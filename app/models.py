@@ -81,18 +81,18 @@ class Session(BaseModel):
     them on every Message.
 
     The JSONL file lives at a path like:
-        ~/.claude/projects/-home-michael-git-me-myproject/3ba2f556-5445-...jsonl
+        ~/.claude/projects/-home-user-git-myproject/3ba2f556-5445-...jsonl
 
     The filename (minus .jsonl) is the session_id (a UUID).
     The cwd comes from records inside the file, e.g.:
-        {"cwd": "/home/michael/git/me/myproject", ...}
+        {"cwd": "/home/user/git/myproject", ...}
     """
 
     # UUID from the filename, e.g. "3ba2f556-5445-4770-b9b3-af99c49b4028"
     session_id: str
 
     # The real working directory for this session, e.g.
-    # "/home/michael/git/me/myproject". Extracted from the first record
+    # "/home/user/git/myproject". Extracted from the first record
     # that has a "cwd" field. This is the actual path on disk, as opposed
     # to the project directory name which encodes slashes as hyphens.
     cwd: str | None = None
@@ -120,3 +120,30 @@ class Session(BaseModel):
 
     # Number of tool calls made by the assistant.
     tool_call_count: int = 0
+
+
+class Project(BaseModel):
+    """
+    A group of sessions that share the same working directory.
+
+    Multiple sessions can happen in the same project directory over time.
+    For example, you might have 5 separate conversations all in
+    /home/user/git/claude-code-viewer.
+
+    The display_name is the last part of the path (e.g. "claude-code-viewer"),
+    useful for showing in listings without the full path.
+    """
+
+    # The last component of the cwd path, e.g. "claude-code-viewer"
+    display_name: str
+
+    # The full working directory path, e.g. "/home/user/git/claude-code-viewer"
+    original_path: str
+
+    # All sessions for this project, ordered by first_timestamp.
+    sessions: list[Session] = Field(default_factory=list)
+
+    # Summary fields, aggregated across all sessions.
+    session_count: int = 0
+    total_user_messages: int = 0
+    total_tool_calls: int = 0

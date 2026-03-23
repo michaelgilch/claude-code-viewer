@@ -11,7 +11,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from .models import Message, Session
+from .models import Message, Project, Session
 
 CLAUDE_PROJECTS_DIR = Path.home() / ".claude" / "projects"
 
@@ -104,14 +104,14 @@ def _parse_jsonl(path: Path) -> Session:
     Parse a JSONL session file into a Session object.
 
     Takes a path like:
-        ~/.claude/projects/-home-michael-git-me-myproject/3ba2f556-...jsonl
+        ~/.claude/projects/-home-user-git-myproject/3ba2f556-...jsonl
 
     The session_id comes from the filename (path.stem strips the .jsonl
     extension), e.g. "3ba2f556-5445-4770-b9b3-af99c49b4028".
 
     The cwd is grabbed from the first record that has one. It's the same
     across all records in a file, so we only need to capture it once.
-    Example: {"cwd": "/home/michael/git/me/myproject", ...}
+    Example: {"cwd": "/home/user/git/myproject", ...}
 
     We read line by line rather than loading the whole file at once because
     session files can be large (thousands of records). errors="replace"
@@ -207,3 +207,42 @@ def scan_projects_dir(projects_dir: Path = CLAUDE_PROJECTS_DIR) -> list[Session]
             sessions.append(_parse_jsonl(jsonl_file))
 
     return sessions
+
+
+def build_projects(sessions: list[Session]) -> list[Project]:
+    """
+    Group sessions by their cwd into Project objects.
+
+    Sessions with the same cwd belong to the same project. For example,
+    5 sessions all with cwd="/home/user/git/claude-code-viewer"
+    become one Project with display_name="claude-code-viewer".
+
+    Sessions without a cwd are grouped under "(unknown)".
+    """
+    # Group sessions by cwd
+    by_cwd: dict[str, list[Session]] = {}
+    for s in sessions:
+        key = s.cwd or "(unknown)"
+        by_cwd.setdefault(key, []).append(s)
+
+    projects = []
+    for cwd, cwd_sessions in by_cwd.items():
+        # Sort sessions within a project by first_timestamp
+        cwd_sessions.sort(key=lambda s: s.first_timestamp or datetime.min.replace(tzinfo=None))
+
+        # Extract display name from the path, e.g.
+        # "/home/user/claude-code-viewer" -> "claude-code-viewer"
+        display_name = Path(cwd).name if cwd != "(unknown)" else "(unknown)"
+
+        projects.append(Project(
+            display_name=display_name,
+            original_path=cwd,
+            sessions=cwd_sessions,
+            session_count=len(cwd_sessions),
+            total_user_messages=sum(s.user_message_count for s in cwd_sessions),
+            total_tool_calls=sum(s.tool_call_count for s in cwd_sessions),
+        ))
+
+    # Sort projects by name
+    projects.sort(key=lambda p: p.display_name.lower())
+    return projects

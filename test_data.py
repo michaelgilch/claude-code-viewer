@@ -1,13 +1,14 @@
 # test_data.py - Quick test script to verify parsing of jsonl files
 #
 # Usage:
-#   .venv/bin/python test_data.py                          # scan all sessions
+#   .venv/bin/python test_data.py                          # list all projects
+#   .venv/bin/python test_data.py sessions                 # list all sessions
 #   .venv/bin/python test_data.py <path-to-session.jsonl>  # parse one file
 
 import sys
 
 from pathlib import Path
-from app.data import _parse_jsonl, scan_projects_dir
+from app.data import _parse_jsonl, scan_projects_dir, build_projects
 
 
 def print_session(session):
@@ -31,7 +32,7 @@ def print_session(session):
         print(f"{m.type:25s} {m.timestamp} {m.role:10s} {tag_str} {text_preview}")
 
 
-def print_summary(sessions):
+def print_sessions(sessions):
     """Print a one-line summary per session."""
     print(f"Found {len(sessions)} sessions\n")
     for s in sessions:
@@ -39,12 +40,23 @@ def print_summary(sessions):
         print(f"{s.session_id[:8]}  {s.message_count:4d} records  {s.user_message_count:3d} prompts  {s.tool_call_count:3d} tools  {prompt}")
 
 
-if len(sys.argv) == 2:
+def print_projects(projects):
+    """Print a one-line summary per project."""
+    print(f"Found {len(projects)} projects\n")
+    for p in projects:
+        print(f"{p.display_name:30s} {p.session_count:3d} sessions  {p.total_user_messages:4d} prompts  {p.total_tool_calls:4d} tools  {p.original_path}")
+
+
+if len(sys.argv) == 1:
+    # Default: list projects
+    sessions = scan_projects_dir()
+    print_projects(build_projects(sessions))
+elif sys.argv[1] == "sessions":
+    # List all sessions
+    print_sessions(scan_projects_dir())
+elif len(sys.argv) == 2:
     # Single file mode
     print_session(_parse_jsonl(Path(sys.argv[1])))
-elif len(sys.argv) == 1:
-    # Scan all sessions
-    print_summary(scan_projects_dir())
 else:
-    print(f"Usage: {sys.argv[0]} [path-to-session.jsonl]")
+    print(f"Usage: {sys.argv[0]} [sessions | path-to-session.jsonl]")
     sys.exit(1)
