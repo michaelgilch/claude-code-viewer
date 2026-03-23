@@ -13,6 +13,8 @@ from pathlib import Path
 
 from .models import Message, Session
 
+CLAUDE_PROJECTS_DIR = Path.home() / ".claude" / "projects"
+
 
 def _parse_timestamp(ts: str | None) -> datetime | None:
     """
@@ -139,3 +141,35 @@ def _parse_jsonl(path: Path) -> Session:
                 continue
 
     return Session(session_id=session_id, cwd=cwd, messages=messages)
+
+
+def scan_projects_dir(projects_dir: Path = CLAUDE_PROJECTS_DIR) -> list[Session]:
+    """
+    Walk ~/.claude/projects/ and parse every JSONL file into a Session.
+
+    Directory structure looks like:
+        ~/.claude/projects/
+        ├── -home-user-git-myproject/
+        │   ├── 3ba2f556-5445-...jsonl      <- one session
+        │   ├── 94626ce6-1070-...jsonl      <- another session
+        │   └── 3ba2f556-.../subagents/     <- subagent data (ignored for now)
+        ├── -home-user-git-another/
+        │   └── ...
+
+    Each subdirectory is a project (directory name encodes the path with
+    hyphens). Each .jsonl file inside is one conversation session.
+
+    Returns a list of Session objects, one per JSONL file found.
+    """
+    sessions = []
+
+    if not projects_dir.is_dir():
+        return sessions
+
+    for project_entry in sorted(projects_dir.iterdir()):
+        if not project_entry.is_dir():
+            continue
+        for jsonl_file in sorted(project_entry.glob("*.jsonl")):
+            sessions.append(_parse_jsonl(jsonl_file))
+
+    return sessions
