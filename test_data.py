@@ -37,6 +37,7 @@ for m in session.messages:
     tags = []
     if m.has_thinking: tags.append("[thinking]")
     if m.tool_name: tags.append(f"[{m.tool_name}]")
+    if m.has_tool_result: tags.append("[tool_result]")
     tag_str = " ".join(tags)
     text_preview = (m.text or "")[:30]
     print(f"{m.type:25s} {m.timestamp} {m.role:10s} {tag_str} {text_preview}")

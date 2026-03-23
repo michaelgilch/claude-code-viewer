@@ -66,6 +66,11 @@ class Message(BaseModel):
     #   {"type": "tool_use", "name": "Bash", "input": {"command": "ls"}}
     tool_name: str | None = None
 
+    # Whether this record carries a tool result (output from a tool call).
+    # These appear as user records with list content like:
+    #   [{"type": "tool_result", "tool_use_id": "toolu_019g...", "content": "..."}]
+    has_tool_result: bool = False
+
 
 class Session(BaseModel):
     """

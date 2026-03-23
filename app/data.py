@@ -70,6 +70,7 @@ def _parse_record(raw: dict) -> Message:
     text = None
     has_thinking = False
     tool_name = None
+    has_tool_result = False
     if isinstance(content, str):
         text = content
     elif isinstance(content, list):
@@ -82,6 +83,8 @@ def _parse_record(raw: dict) -> Message:
                 has_thinking = True
             elif block.get("type") == "tool_use" and tool_name is None:
                 tool_name = block.get("name")
+            elif block.get("type") == "tool_result":
+                has_tool_result = True
 
     return Message(
         type=raw.get("type", "unknown"),
@@ -90,6 +93,7 @@ def _parse_record(raw: dict) -> Message:
         text=text,
         has_thinking=has_thinking,
         tool_name=tool_name,
+        has_tool_result=has_tool_result,
     )
 
 
