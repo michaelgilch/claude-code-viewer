@@ -12,9 +12,14 @@ from app.data import _parse_jsonl, scan_projects_dir
 
 def print_session(session):
     """Print a single session's details."""
-    print(f"Session: {session.session_id}")
-    print(f"CWD:     {session.cwd}")
-    print(f"Records: {len(session.messages)}")
+    print(f"Session:       {session.session_id}")
+    print(f"CWD:           {session.cwd}")
+    print(f"First prompt:  {(session.first_prompt or '(none)')[:80]}")
+    print(f"First time:    {session.first_timestamp}")
+    print(f"Last time:     {session.last_timestamp}")
+    print(f"Records:       {session.message_count}")
+    print(f"User prompts:  {session.user_message_count}")
+    print(f"Tool calls:    {session.tool_call_count}")
     print()
     for m in session.messages:
         tags = []
@@ -30,9 +35,8 @@ def print_summary(sessions):
     """Print a one-line summary per session."""
     print(f"Found {len(sessions)} sessions\n")
     for s in sessions:
-        user_msgs = sum(1 for m in s.messages if m.role == "user" and not m.has_tool_result)
-        tool_calls = sum(1 for m in s.messages if m.tool_name)
-        print(f"{s.session_id[:8]}  {len(s.messages):4d} records  {user_msgs:3d} prompts  {tool_calls:3d} tools  {s.cwd}")
+        prompt = (s.first_prompt or "(none)")[:40]
+        print(f"{s.session_id[:8]}  {s.message_count:4d} records  {s.user_message_count:3d} prompts  {s.tool_call_count:3d} tools  {prompt}")
 
 
 if len(sys.argv) == 2:

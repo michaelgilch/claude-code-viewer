@@ -140,7 +140,41 @@ def _parse_jsonl(path: Path) -> Session:
                 # Skip malformed lines rather than crashing
                 continue
 
-    return Session(session_id=session_id, cwd=cwd, messages=messages)
+    # Compute summary fields from the parsed messages.
+    first_prompt = None
+    first_timestamp = None
+    last_timestamp = None
+    user_message_count = 0
+    tool_call_count = 0
+
+    for m in messages:
+        # Track first and last timestamps
+        if m.timestamp:
+            if first_timestamp is None:
+                first_timestamp = m.timestamp
+            last_timestamp = m.timestamp
+
+        # Count real user prompts and grab the first one as a preview
+        if m.role == "user" and not m.has_tool_result:
+            user_message_count += 1
+            if first_prompt is None and m.text:
+                first_prompt = m.text[:200]
+
+        # Count tool calls
+        if m.tool_name:
+            tool_call_count += 1
+
+    return Session(
+        session_id=session_id,
+        cwd=cwd,
+        messages=messages,
+        first_prompt=first_prompt,
+        first_timestamp=first_timestamp,
+        last_timestamp=last_timestamp,
+        message_count=len(messages),
+        user_message_count=user_message_count,
+        tool_call_count=tool_call_count,
+    )
 
 
 def scan_projects_dir(projects_dir: Path = CLAUDE_PROJECTS_DIR) -> list[Session]:

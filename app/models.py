@@ -98,7 +98,25 @@ class Session(BaseModel):
     cwd: str | None = None
 
     # All records from the JSONL file, in order.
-    # Field(default_factory=list) creates a fresh empty list for each
-    # Session instance. Without default_factory, all instances would
-    # share the same list object (a common Python gotcha with mutable defaults).
     messages: list[Message] = Field(default_factory=list)
+
+    # Summary fields, computed after parsing all messages.
+
+    # First 200 chars of the first real user prompt (not a tool result).
+    # Useful as a preview/title for the session in listings.
+    first_prompt: str | None = None
+
+    # Timestamp of the first record with a timestamp.
+    first_timestamp: datetime | None = None
+
+    # Timestamp of the last record with a timestamp.
+    last_timestamp: datetime | None = None
+
+    # Total number of records in the JSONL file.
+    message_count: int = 0
+
+    # Number of real user prompts (excluding tool_result records).
+    user_message_count: int = 0
+
+    # Number of tool calls made by the assistant.
+    tool_call_count: int = 0
