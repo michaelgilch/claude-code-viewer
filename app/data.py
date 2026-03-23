@@ -62,12 +62,19 @@ def _parse_record(raw: dict) -> Message:
     """
     msg = raw.get("message", {}) or {}
 
-    # For simple user messages, content is a plain string like:
+    # User messages: content is a plain string like:
     #   "message": {"role": "user", "content": "What does this function do?"}
-    # For other cases (assistant messages, tool results), content is a list.
-    # We only extract the text for the simple string case for now.
+    # Assistant messages: content is a list of blocks like:
+    #   "message": {"content": [{"type": "text", "text": "This function..."}]}
     content = msg.get("content")
-    text = content if isinstance(content, str) else None
+    text = None
+    if isinstance(content, str):
+        text = content
+    elif isinstance(content, list):
+        for block in content:
+            if isinstance(block, dict) and block.get("type") == "text":
+                text = block.get("text", "")
+                break
 
     return Message(
         type=raw.get("type", "unknown"),
