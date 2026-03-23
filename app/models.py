@@ -52,10 +52,14 @@ class Message(BaseModel):
     # None for non-conversation records (progress, system, etc.).
     role: str | None = None
 
-    # The message text. For simple user messages, this is the plain string
-    # from message.content, e.g. "What does this function do?"
-    # None for non-conversation records or when content isn't a string.
+    # The message text. For user messages, the plain string from message.content.
+    # For assistant messages, the first "text" block's content.
+    # None for non-conversation records or records with no text block.
     text: str | None = None
+
+    # Whether this record contains a thinking block. Claude Code redacts
+    # the actual thinking content in the JSONL, so we just track presence.
+    has_thinking: bool = False
 
 
 class Session(BaseModel):

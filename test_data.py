@@ -32,5 +32,7 @@ print()
 # type:      the record type (user, assistant, progress, etc.)
 # timestamp: when it was recorded (None for some types)
 # role:      "user" or "assistant" (None for non-conversation records)
+# text:      message contents
 for m in session.messages:
-    print(f"{m.type:25s} {m.timestamp} {m.role:10s} {(m.text or '')[:30]}")
+    thinking = "[thinking] " if m.has_thinking else ""
+    print(f"{m.type:25s} {m.timestamp} {m.role:10s} {thinking}{(m.text or '')[:30]}")

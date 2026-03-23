@@ -68,19 +68,24 @@ def _parse_record(raw: dict) -> Message:
     #   "message": {"content": [{"type": "text", "text": "This function..."}]}
     content = msg.get("content")
     text = None
+    has_thinking = False
     if isinstance(content, str):
         text = content
     elif isinstance(content, list):
         for block in content:
-            if isinstance(block, dict) and block.get("type") == "text":
+            if not isinstance(block, dict):
+                continue
+            if block.get("type") == "text" and text is None:
                 text = block.get("text", "")
-                break
+            elif block.get("type") == "thinking":
+                has_thinking = True
 
     return Message(
         type=raw.get("type", "unknown"),
         timestamp=_parse_timestamp(raw.get("timestamp")),
         role=msg.get("role", ""),
         text=text,
+        has_thinking=has_thinking,
     )
 
 
