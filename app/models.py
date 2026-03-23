@@ -52,6 +52,11 @@ class Message(BaseModel):
     # None for non-conversation records (progress, system, etc.).
     role: str | None = None
 
+    # The message text. For simple user messages, this is the plain string
+    # from message.content, e.g. "What does this function do?"
+    # None for non-conversation records or when content isn't a string.
+    text: str | None = None
+
 
 class Session(BaseModel):
     """

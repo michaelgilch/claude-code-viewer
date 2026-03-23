@@ -61,10 +61,19 @@ def _parse_record(raw: dict) -> Message:
     but is None (which would cause msg.get() to crash).
     """
     msg = raw.get("message", {}) or {}
+
+    # For simple user messages, content is a plain string like:
+    #   "message": {"role": "user", "content": "What does this function do?"}
+    # For other cases (assistant messages, tool results), content is a list.
+    # We only extract the text for the simple string case for now.
+    content = msg.get("content")
+    text = content if isinstance(content, str) else None
+
     return Message(
         type=raw.get("type", "unknown"),
         timestamp=_parse_timestamp(raw.get("timestamp")),
-        role=msg.get("role"),
+        role=msg.get("role", ""),
+        text=text,
     )
 
 

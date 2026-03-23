@@ -33,4 +33,4 @@ print()
 # timestamp: when it was recorded (None for some types)
 # role:      "user" or "assistant" (None for non-conversation records)
 for m in session.messages:
-    print(f"{m.type:25s} {m.timestamp} {m.role}")
+    print(f"{m.type:25s} {m.timestamp} {m.role:10s} {(m.text or '')[:30]}")
