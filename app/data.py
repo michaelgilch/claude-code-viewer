@@ -123,6 +123,7 @@ def _parse_jsonl(path: Path) -> Session:
     because Claude Code was killed mid-write), we skip it and continue.
     """
     session_id = path.stem
+    project_dir = path.parent.name  # e.g. "-home-michael-git-me-dotfiles"
     cwd = None
     messages = []
 
@@ -166,6 +167,7 @@ def _parse_jsonl(path: Path) -> Session:
 
     return Session(
         session_id=session_id,
+        project_dir=project_dir,
         cwd=cwd,
         messages=messages,
         first_prompt=first_prompt,
@@ -234,9 +236,13 @@ def build_projects(sessions: list[Session]) -> list[Project]:
         # "/home/user/claude-code-viewer" -> "claude-code-viewer"
         display_name = Path(cwd).name if cwd != "(unknown)" else "(unknown)"
 
+        # Use the first session's project_dir as the slug
+        slug = cwd_sessions[0].project_dir if cwd_sessions else ""
+
         projects.append(Project(
             display_name=display_name,
             original_path=cwd,
+            slug=slug,
             sessions=cwd_sessions,
             session_count=len(cwd_sessions),
             total_user_messages=sum(s.user_message_count for s in cwd_sessions),

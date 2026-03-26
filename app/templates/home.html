@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Claude Code Viewer{% endblock %}
+
+{% block content %}
+<h1>Claude Code Viewer</h1>
+<p>{{ projects | length }} projects</p>
+<ul>
+{% for p in projects %}
+    <li><a href="/project/{{ p.slug }}">{{ p.display_name }}</a> ({{ p.session_count }} sessions, {{ p.total_user_messages }} prompts)</li>
+{% endfor %}
+</ul>
+{% endblock %}

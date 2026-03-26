@@ -91,6 +91,10 @@ class Session(BaseModel):
     # UUID from the filename, e.g. "3ba2f556-5445-4770-b9b3-af99c49b4028"
     session_id: str
 
+    # The Claude Code directory name for this session's project, e.g.
+    # "-home-michael-git-me-dotfiles". Already URL-safe, used as the slug.
+    project_dir: str = ""
+
     # The real working directory for this session, e.g.
     # "/home/user/git/myproject". Extracted from the first record
     # that has a "cwd" field. This is the actual path on disk, as opposed
@@ -139,6 +143,10 @@ class Project(BaseModel):
 
     # The full working directory path, e.g. "/home/user/git/claude-code-viewer"
     original_path: str
+
+    # The Claude Code directory name, e.g. "-home-michael-git-me-dotfiles".
+    # URL-safe, used in routes. Taken from the first session's project_dir.
+    slug: str = ""
 
     # All sessions for this project, ordered by first_timestamp.
     sessions: list[Session] = Field(default_factory=list)

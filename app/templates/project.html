@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.display_name }}{% endblock %}
+
+{% block content %}
+<h1>{{ project.display_name }}</h1>
+<p>{{ project.original_path }}</p>
+<p>{{ project.session_count }} sessions</p>
+<ul>
+{% for s in project.sessions %}
+    <li>
+        <a href="/project/{{ project.slug }}/session/{{ s.session_id }}">{{ s.session_id[:8] }}</a>
+        - {{ (s.first_prompt or "(no prompt)")[:80] }}
+        ({{ s.user_message_count }} prompts, {{ s.tool_call_count }} tools)
+    </li>
+{% endfor %}
+</ul>
+<p><a href="/">Back</a></p>
+{% endblock %}
