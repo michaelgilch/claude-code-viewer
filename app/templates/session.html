@@ -9,15 +9,15 @@
 
 {% for m in session.messages %}
     {% if m.role == "user" and m.text and not m.has_tool_result %}
-        <div style="margin:1em 0;padding:0.5em;background:#eeeeff;border-left:3px solid #4a9eff">
+        <div class="message message-user">
             <b>User:</b><br>{{ m.text }}
         </div>
     {% elif m.role == "assistant" and m.text %}
-        <div style="margin:1em 0;padding:0.5em;background:#ccddcc;border-left:3px solid #4aff9e">
+        <div class="message message-assistant">
             <b>Assistant:</b><br>{{ m.text[:500] }}
         </div>
     {% elif m.role == "assistant" and m.tool_name %}
-        <div style="margin:1em 0;padding:0.5em;background:#eedddd;border-left:3px solid #ffcc4a">
+        <div class="message message-tool">
             <b>Tool:</b> {{ m.tool_name }}
         </div>
     {% endif %}

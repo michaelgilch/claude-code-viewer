@@ -1,0 +1,22 @@
+/* Message bubbles for the session conversation view */
+
+.message {
+    margin: 1em 0;
+    padding: 0.5em;
+    border-left: 3px solid;
+}
+
+.message-user {
+    background: #eeeeff;
+    border-left-color: #4a9eff;
+}
+
+.message-assistant {
+    background: #ccddcc;
+    border-left-color: #4aff9e;
+}
+
+.message-tool {
+    background: #eedddd;
+    border-left-color: #ffcc4a;
+}

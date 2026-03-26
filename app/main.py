@@ -17,11 +17,15 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from .data import scan_projects_dir, build_projects
 
 app = FastAPI()
+
+# Serve CSS/JS from app/static/ at the /static URL path.
+app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
 
 # Point Jinja2 at app/templates/. Path(__file__).parent resolves to the app/
 # directory regardless of where the server is started from.
